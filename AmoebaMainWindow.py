@@ -54,6 +54,10 @@ class AmoebaMainWindow(QMainWindow):
         file_load.setStatusTip('Load a previous experiment.')
         file_load.triggered.connect(self.LoadExperiment)
 
+        clear_GUI = QAction('Clear Gui', self)
+        clear_GUI.setStatusTip('Clear the GUI.')
+        clear_GUI.triggered.connect(self.clearGui)
+
         file_exit = QAction('Exit', self)
         file_exit.setStatusTip('Close the program')
 
@@ -62,6 +66,7 @@ class AmoebaMainWindow(QMainWindow):
         filemenu.addAction(file_load)
         filemenu.addAction(file_save)
         filemenu.addAction(file_save_csv)
+        filemenu.addAction(clear_GUI)
         filemenu.addAction(file_exit)
 
         connect_server = QAction('Connect to an Amoeba Server.',self)
@@ -80,6 +85,7 @@ class AmoebaMainWindow(QMainWindow):
         The method loads in an experiment.
         """
         print "Load experiment"
+        self.currentExperiment = Amoeba_desktop_experiment(self.tabs)
         self.path = self.loadexperiment.load()
         self.currentExperiment.read_in_from_XML(self.path)
         self.tabs.clear_gui()
@@ -123,6 +129,14 @@ class AmoebaMainWindow(QMainWindow):
             self.server.disconnect()
         if self.experimentControl.connectedLocally == True:
             self.experimentControl.disconnectFromLocalServer()
+
+    def clearGui(self):
+        """
+        This method clears the GUI.
+        :return:
+        """
+        self.tabs.clear_gui()
+        self.currentExperiment = Amoeba_desktop_experiment(self.tabs)
         
 def main():
     app = QApplication(sys.argv)

@@ -23,6 +23,8 @@ AMOEBA_IMPORT_EXPERIMENT_DEBUG = 0
 
 AMOEBA_EXPERIMENT_IMPORT_LINK_DEBUG = 0
 
+AMOEBA_IMPORT_ERROR_MESSAGES = 0
+
 class Amoeba_experiment():
     def __init__(self):
         """
@@ -196,7 +198,8 @@ class Amoeba_experiment():
             if AMOEBA_EXPERIMENT_DEBUG:
                 print self.time
         except:
-            print "Error importing basics."
+            if AMOEBA_IMPORT_ERROR_MESSAGES==1:
+                print "Error importing basics."
 
     def import_instrument(self,inst):
         try:
@@ -212,7 +215,8 @@ class Amoeba_experiment():
                 sens.print_command()
             self.instruments.append(sens)
         except:
-            print "Error importing experiment."
+            if AMOEBA_IMPORT_ERROR_MESSAGES==1:
+                print "Error importing experiment."
 
     def import_reading(self,element):
         #  Retrieve date and time.
@@ -231,7 +235,8 @@ class Amoeba_experiment():
             else:
                 print "Error false address."
         except:
-            print "Error importing reading."
+            if AMOEBA_IMPORT_ERROR_MESSAGES==1:
+                print "Error importing reading."
 
     def tree_string(self):
         """
@@ -244,6 +249,8 @@ class Amoeba_experiment():
         """
         This method clears the data from the instruments.
         """
+        for i in self.instruments:
+            i.clear()
 
     def create_tree_from_experiment(self):
         """

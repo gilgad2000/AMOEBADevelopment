@@ -59,6 +59,9 @@ class AmoebaConnectServer(QWidget):
         #Stop experiment widget.
         self.stopExperimentWidget = QPushButton("Stop")
 
+        #Clear experiment.
+        self.clearExperimentWidget = QPushButton("Clear Readings")
+
         #Local mode details
         self.local_mode = QCheckBox("Local Mode")
         self.serial_port_label = QLabel("Serial Port:")
@@ -91,6 +94,7 @@ class AmoebaConnectServer(QWidget):
         self.layoutG.addWidget(self.startExperiment)
         
         self.layoutH.addWidget(self.startExperimentWidget)
+        self.layoutH.addWidget(self.clearExperimentWidget)
         self.layoutH.addWidget(self.stopExperimentWidget)
 
         self.layoutG.addLayout(self.layoutH)
@@ -151,6 +155,7 @@ class AmoebaConnectServer(QWidget):
         self.testExperimentButton.clicked.connect(self.test)
         self.local_mode.clicked.connect(self.localHost)
         self.local_connect_button.clicked.connect(self.connect_locally)
+        self.clearExperimentWidget.clicked.connect(self.clear_data)
 
         #Disable necessary buttons.
         self.localModeActive()
@@ -178,6 +183,7 @@ class AmoebaConnectServer(QWidget):
         """
         self.stopExperimentWidget.setEnabled(0)
         self.startExperimentWidget.setEnabled(1)
+        self.clearExperimentWidget.setEnabled(1)
         self.control.stopExperiment(self.running_local_mode)
 
     def start(self):
@@ -185,6 +191,7 @@ class AmoebaConnectServer(QWidget):
         This function tells the control class to tell the Server to start the current experiment.
         """
         self.stopExperimentWidget.setEnabled(1)
+        self.clearExperimentWidget.setEnabled(0)
         self.startExperimentWidget.setEnabled(0)
         print "Run experiment."
         self.control.connectedLocally = self.running_local_mode
@@ -333,6 +340,13 @@ class AmoebaConnectServer(QWidget):
             print "Window closed."
         event.ignore()
         self.subWindow.hide()
+
+    def clear_data(self):
+        """
+        This method clears any previously stored experimental data.
+        :return:
+        """
+        self.control.clearData()
 
 def main():
     app = QApplication(sys.argv)

@@ -287,7 +287,6 @@ class Amoeba_parameter():
         """
         This method clears all past readings from the channel.
         """
-        print "Clear"
         self.readings=[]
 
     def writeDataToXML(self,dataRoot,address):

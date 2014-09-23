@@ -93,6 +93,14 @@ class AmoebaExperimentControl(QTCore.QThread):
         #self.tabs.update()
         self.tabs.run()
 
+    def clearData(self):
+        """
+        This method clears the previously gathered experimental data and updates the UI.
+        :return:
+        """
+        self.experiment.clear_data()
+        self.updateUI()
+
 #####################    Local functions  ##############################
 
     def startExperimentLocally(self):

@@ -42,9 +42,9 @@ class TabDialog(QWidget,QThread):
         """
         #Create the scroll widget
         self.clear_gui()
-        scrollLayout = QVBoxLayout()
+        self.scrollLayout = QVBoxLayout()
         scrollwidget = QWidget()
-        scrollwidget.setLayout(scrollLayout)
+        scrollwidget.setLayout(self.scrollLayout)
         
         #  Create a scroll bar for the summary area
         self.sum_scroll = QScrollArea()
@@ -61,26 +61,25 @@ class TabDialog(QWidget,QThread):
             tab.create_tab()
             tab.index = self.tabWidget.addTab(tab, tab.sensor.name)
 
-            scrollLayout.addWidget(tab.getSummaryWidget())
+            self.scrollLayout.addWidget(tab.getSummaryWidget())
 
             if AMOEBA_TAB_DIALOG_DEBUG:
                 print "Index = " + str(tab.index)
             self.tabs.append(tab)
-
-        self.summary_box.setLayout(scrollLayout)
-        
+        self.summary_box.setLayout(self.scrollLayout)
         self.loaded = 1
+
 
     def clear_gui(self):
         """
-        This method clears the UI.  I'm not sure it fully works.
+        This method clears the UI.  It still doesn't clear the tabs.
         """
         if AMOEBA_TAB_DIALOG_DEBUG:
             print "Clear tabs"
-        for i in self.tabs:
-            print "Tab index = " + str(i.index)
-            #Remove the widget from the tab dialog.
-            i.destroy()
+        #  Clear the summaries.
+        self.scrollLayout = QVBoxLayout()
+        #  Clear the tabs.
+        self.tabWidget.clear()
         self.tabWidget.update()
         self.tabs = []
 
