@@ -5,7 +5,7 @@ from AmoebaMainWindow import *
 from AmoebaServer import*
 from AmoebaImportExperiment import *
 
-#GIT TEST!!!!
+#GIT TEST 2 !!!!
 
 # Serial data testing program for use with an Ardunio board connected via USB on COM3.
 
