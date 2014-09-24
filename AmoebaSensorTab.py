@@ -114,7 +114,8 @@ class Amoeba_Sensor_Tab(QWidget):
             i.clear()
 
     def getSummaryWidget(self):
-        return self.summary.return_widget()
+        return self.summary
+
 
 class Amoeba_Instrument_Summary_UI(QWidget):
     def __init__(self,parent=None):
@@ -124,9 +125,12 @@ class Amoeba_Instrument_Summary_UI(QWidget):
         :param parent: Inheritance details.
         """
         QWidget.__init__(self,parent)
+        layout = QVBoxLayout()
         self.summary_layout = QVBoxLayout()
         self.summary_box = QGroupBox()
         self.params = []
+        layout.addWidget(self.summary_box)
+        self.setLayout(layout)
 
     def createFromSensor(self,sensor):
         """
@@ -153,13 +157,7 @@ class Amoeba_Instrument_Summary_UI(QWidget):
         for i in self.params:
             i.update()
 
-    def return_widget(self):
-        """
-        This method returns the summary widget in a form which can be directly added to a layout.
-        :return: Summary box widget.  Can be directly added to a layout.
-        """
-        return self.summary_box
-            
+
 class Amoeba_Parameter_Summary(QWidget):
     def __init__(self,parameter,parent=None):
         """

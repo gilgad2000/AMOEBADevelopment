@@ -19,7 +19,7 @@ class TabDialog(QWidget,QThread):
 
         self.loaded = 0
         self.tabs = []
-        self.summaries = []
+        self.summaryWidgets = []
 
         if AMOEBA_TAB_DIALOG_DEBUG:
             print "Creating tab widget"
@@ -35,49 +35,57 @@ class TabDialog(QWidget,QThread):
         mainLayout.addWidget(self.tabWidget)
         self.setLayout(mainLayout)
 
+        #  Summary boxes.
+        self.summaryBoxLayout = QVBoxLayout()
+        self.summary_box.setLayout(self.summaryBoxLayout)
+
+
     def make_gui(self,experiment):
         """
         This method creates the tabs in GUI from an experiment.
         :param experiment: AmoebaExperiment class containing and experiment.
         """
-        #Create the scroll widget
-        self.clear_gui()
-        self.scrollLayout = QVBoxLayout()
-        scrollwidget = QWidget()
-        scrollwidget.setLayout(self.scrollLayout)
-        
-        #  Create a scroll bar for the summary area
-        self.sum_scroll = QScrollArea()
-        self.sum_scroll.setWidgetResizable(True)
-        self.sum_scroll.setWidget(scrollwidget)
-
         for i in experiment.instruments:
             if AMOEBA_TAB_DIALOG_DEBUG:
                 print "Start = " + str(i)
                 i.print_command()
                 print "Finish\n"
+            #  Create the tab and and add it to the tabWidget.
             tab = Amoeba_Sensor_Tab()
             tab.import_sensor(i)
             tab.create_tab()
             tab.index = self.tabWidget.addTab(tab, tab.sensor.name)
+            self.tabs.append(tab)
 
-            self.scrollLayout.addWidget(tab.getSummaryWidget())
+            #  Retrieve the summary widget from the Amoeba_Sensor_Tab.
+            singleSummaryWidget = tab.getSummaryWidget()
+            #  Add it to the list of summary widgets.
+            self.summaryWidgets.append(singleSummaryWidget)
+            #  Add it to the summary Scroll Layout.
+            self.summaryBoxLayout.addWidget(singleSummaryWidget)
 
             if AMOEBA_TAB_DIALOG_DEBUG:
                 print "Index = " + str(tab.index)
-            self.tabs.append(tab)
-        self.summary_box.setLayout(self.scrollLayout)
+
         self.loaded = 1
 
 
     def clear_gui(self):
         """
-        This method clears the UI.  It still doesn't clear the tabs.
+        This method clears the UI.  This code clears the tabs, it also clears the summary widgets.  Unfortunatly it doesn't rerender properly once they have changed.  Other than that it works fine.
         """
         if AMOEBA_TAB_DIALOG_DEBUG:
             print "Clear tabs"
+
         #  Clear the summaries.
-        self.scrollLayout = QVBoxLayout()
+        for i in self.summaryWidgets:
+            self.summaryBoxLayout.removeWidget(i)
+        self.summaryBoxLayout.update()
+        self.summary_box.update()
+
+        self.summary_box.setLayout(self.summaryBoxLayout)
+        self.summary_box.repaint()
+
         #  Clear the tabs.
         self.tabWidget.clear()
         self.tabWidget.update()
