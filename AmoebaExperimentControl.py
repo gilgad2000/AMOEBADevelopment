@@ -55,6 +55,14 @@ class AmoebaExperimentControl(QTCore.QThread):
     def run(self, *args, **kwargs):
         self.startExperiment()
 
+    def updateExperiment(self,new_experiment):
+        """
+        This method updates the experiment.
+        :param new_experiment:
+        :return:
+        """
+        self.experiment = new_experiment
+
     def startExperiment(self):
         """
         This function tells the server to start the experiment.

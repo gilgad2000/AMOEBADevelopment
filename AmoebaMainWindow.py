@@ -91,6 +91,9 @@ class AmoebaMainWindow(QMainWindow):
         self.tabs.clear_gui()
         self.tabs.make_gui(self.currentExperiment)
         self.tabs.update()
+        self.experimentControl.updateExperiment(self.currentExperiment)
+
+
 
     def ConnectServer(self):
         """

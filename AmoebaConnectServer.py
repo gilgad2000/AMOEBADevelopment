@@ -196,7 +196,6 @@ class AmoebaConnectServer(QWidget):
         print "Run experiment."
         self.control.connectedLocally = self.running_local_mode
         self.control.run()
-        #self.control.startExperiment(self.running_local_mode)
 
     def show(self):
         """
