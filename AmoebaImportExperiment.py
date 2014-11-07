@@ -34,6 +34,7 @@ class Amoeba_experiment():
         self.name=""
         self.description=""
         self.path = ""
+        self.script = ""
         self.instruments=[]
         if AMOEBA_BUS:
             self.bus=[]
@@ -162,6 +163,9 @@ class Amoeba_experiment():
                 tmpcontrol = AmoebaCommandController()
                 tmpcontrol.importFromTree(child)
                 self.control.append(tmpcontrol)
+            if child.tag == "script":
+                self.script = child.attrib.get("script")
+                print self.script
             if child.tag == "data":
                 values = child.getchildren()
                 for value in values:

@@ -17,6 +17,8 @@ EXPERIMENT_FOLDER = "C:\\devel\\Amoeba\\Support_Files\\Experiments\\"
 
 INSTRUMENT_FOLDER = "C:\\devel\\Amoeba\\Support_Files\\Sensors\\"
 
+SCRIPT_FOLDER = "C:\\devel\\Amoeba\\Support_Files\\Scripts\\"
+
 SUCCESS = 0
 
 #DEFAULT_IP = "129.236.254.122"
@@ -32,6 +34,7 @@ class AmoebaSys():
         """
         print "Create Amoeba System."
         self.mainUI = AmoebaMainWindow()
+        sys.path.append(SCRIPT_FOLDER)
 
 def main():
     """

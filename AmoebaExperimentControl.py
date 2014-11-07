@@ -117,6 +117,9 @@ class AmoebaExperimentControl(QTCore.QThread):
         """
         self.checkString = []
         self.checkArray = []
+        if self.experiment.script != "":
+            x = __import__(self.experiment.script)
+            self.userScript = x.UserScript()
         able_to_run = True
         if AMOEBA_EXPERIMENT_CONTROL:
             print "Run Experiment Locally."
@@ -155,6 +158,8 @@ class AmoebaExperimentControl(QTCore.QThread):
                 self.updateUITimer.start()
                 if AMOEBA_EXPERIMENT_CONTROL:
                     print "Experiment starting."
+            #  Run the start script.
+            self.userScript.start()
 
     def stopExperimentLocally(self):
         """
@@ -175,6 +180,9 @@ class AmoebaExperimentControl(QTCore.QThread):
         """
         #thread.start_new_thread(self.getLocalReadings)
         self.getLocalReadings()
+        #  Start the scripted experiment turnly calculation.
+        #  PUT IT HERE!!!
+        self.userScript.everyTurn()
 
     def getLocalReadings(self):
         #  For each instrument
