@@ -5,19 +5,17 @@ from AmoebaMainWindow import *
 from AmoebaServer import*
 from AmoebaImportExperiment import *
 
-#GIT TEST 2 !!!!
-
 # Serial data testing program for use with an Ardunio board connected via USB on COM3.
 
 #Global define variables.
 
-DEFAULT_FOLDER = "C:\\devel\\Amoeba\\Support_Files\\"
+DEFAULT_FOLDER = "C:\\devel\\Ameoba\\Support_Files\\"
 
-EXPERIMENT_FOLDER = "C:\\devel\\Amoeba\\Support_Files\\Experiments\\"
+EXPERIMENT_FOLDER = "C:\\devel\\Ameoba\\Support_Files\\Experiments\\"
 
-INSTRUMENT_FOLDER = "C:\\devel\\Amoeba\\Support_Files\\Sensors\\"
+INSTRUMENT_FOLDER = "C:\\devel\\Ameoba\\Support_Files\\Sensors\\"
 
-SCRIPT_FOLDER = "C:\\devel\\Amoeba\\Support_Files\\Scripts\\"
+SCRIPT_FOLDER = "C:\\devel\\Ameoba\\Support_Files\\Scripts\\"
 
 SUCCESS = 0
 

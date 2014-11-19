@@ -66,9 +66,24 @@ class Amoeba_sensor():
         print "Type = " + str(self.type)
         print "Filename = " + str(self.filename)
         for i in self.parameters:
-            i.print_parameter() # slightly cryptic python way of writing self.parameters[i]
+            i.print_parameter()
         for i in self.commands:
             i.print_command()
+
+    def __str__(self):
+        """
+        This method overrides the string conversion of each class.
+        """
+        string = "Name = " + str(self.name) + "\n"
+        string = string + "Address = " + str(self.address) + "\n"
+        string = string + "Description = " + str(self.description) + "\n"
+        string = string + "Type = " + str(self.type) + "\n"
+        string = string + "Filename = " + str(self.filename) + "\n"
+        for i in self.parameters:
+            string = string + str(i)
+        for i in self.commands:
+            string = string + str(i)
+        return string
 
     def get_address(self):
         """
@@ -110,6 +125,7 @@ class Amoeba_sensor():
                     print "N.A."
         return reading
 
+
     def writeExperimentElement(self,inst):
         """
         This method writes the Amoeba_sensor to an Elementtree element.
@@ -137,6 +153,7 @@ class Amoeba_sensor():
         This method writes the reading to an XML string.
         """
         print "Write to XML."
+
 
 class Amoeba_reading():
 
@@ -196,6 +213,9 @@ class Amoeba_reading():
         self.set_reading_time(time)
         self.set_sensor_reading(float(treeElement.attrib.get("val")))
 
+    def __str__(self):
+        string = "Time taken = " + str(self.time) + " Reading = " + str(self.reading)
+        return string
  
 class Amoeba_command():
 
@@ -226,6 +246,13 @@ class Amoeba_command():
         """
         print "String = " + self.command_string + " Outputs = " + self.number_outputs + " Inputs = " + self.number_inputs
 
+    def __str__(self):
+        """
+        This method returns the print string.
+        """
+        string = "String = " + self.command_string + " Outputs = " + self.number_outputs + " Inputs = " + self.number_inputs + "\n"
+        return string
+
 class Amoeba_parameter():
     
     def __init__(self):
@@ -236,6 +263,9 @@ class Amoeba_parameter():
         self.description = ""
         self.number = 0
         self.readings=[]
+        self.min = 0
+        self.max = 0
+        self.sensor = False
 
     def retrieve_data(self,data_string):
         """
@@ -246,6 +276,12 @@ class Amoeba_parameter():
         self.name = data_string.attrib.get("name")
         self.number = data_string.attrib.get("number")
         self.description = data_string.attrib.get("description")
+        self.min = float(data_string.attrib.get("min"))
+        self.max = float(data_string.attrib.get("max"))
+        if data_string.attrib.get("type") == "sensor":
+            self.sensor = True
+        else:
+            self.sensor = False
         if AMOEBA_PARAMETER_DEBUG:
             self.print_parameter()
         return self
@@ -254,7 +290,14 @@ class Amoeba_parameter():
         """
         This method prints out a parameter.
         """
-        print "Name = " + self.name + " Description = " + self.description + " Number = " + self.number
+        print "Name = " + str(self.name) + " Description = " + str(self.description) + " Number = " + str(self.number) + " Min = " + str(self.min) + " Max = " + str(self.max) + " Sensor = " + str(self.sensor)
+
+    def __str__(self):
+        """
+        This method produces the print string as a string.
+        """
+        string = "Name = " + str(self.name) + " Description = " + str(self.description) + " Number = " + str(self.number) + " Min = " + str(self.min) + " Max = " +str(self.max) + " Sensor = " + str(self.sensor) + "\n"
+        return string
 
     def add_reading(self,data):
         """
@@ -283,6 +326,17 @@ class Amoeba_parameter():
         else:
             return "N.A."
 
+    def get_newest_full_reading(self):
+        """
+        This method returns the latest reading for that parameter.
+        :return: Latest reading.
+        """
+        length = len(self.readings)
+        if length > 0:
+            return self.readings[length-1]
+        else:
+            return "N.A."
+
     def clear(self):
         """
         This method clears all past readings from the channel.
@@ -304,6 +358,11 @@ class Amoeba_parameter():
             count = count + 1
         if AMOEBA_TOTAL_READINGS_WRITTEN:
             print "Total readings written = " + str(count)
+
+    def printReadings(self):
+        print str(self)
+        for i in self.readings:
+            print str(i)
 
 if __name__== "__main__":
     tree = Amoeba_sensor()

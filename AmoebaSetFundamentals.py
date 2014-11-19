@@ -6,6 +6,7 @@ import Amoeba
 from PySide.QtCore import *
 from PySide.QtGui import *
 import xml.etree.ElementTree as ET
+import glob
 
 AMOEBA_SET_FUNDAMENTALS_DEBUG=1
 
@@ -34,17 +35,27 @@ class AmoebaSetFundamentalParameters(QWidget):
         syncLabel = QLabel("Update client every:")
         nameLabel = QLabel("Experiment Name:")
         descriptionLabel = QLabel("Experiment Description:")
+        scriptNameLabel= QLabel("Script Name:")
 
         self.selectReadingTime = QComboBox()
         self.selectSyncTime = QComboBox()
         self.selectExperimentName = QLineEdit()
         self.selectExperimentDescription = QLineEdit()
+        self.selectScript = QComboBox()
         
         for i in readingTime:
             self.selectReadingTime.addItem(i)
 
         for i in syncTime:
             self.selectSyncTime.addItem(i)
+
+        #  Retrieve script names from the script folder.
+        filelist = glob.glob(Amoeba.SCRIPT_FOLDER+"*.py")
+        self.selectScript.addItem("")
+        for i in filelist:
+            i = i.split("\\")
+            name = i[-1]
+            self.selectScript.addItem(name)
 
         #Add Widgets to Layout
 
@@ -53,6 +64,9 @@ class AmoebaSetFundamentalParameters(QWidget):
 
         mainLayout.addWidget(descriptionLabel)
         mainLayout.addWidget(self.selectExperimentDescription)
+
+        mainLayout.addWidget(scriptNameLabel)
+        mainLayout.addWidget(self.selectScript)
 
         layoutA.addWidget(readingLabel)
         layoutA.addWidget(self.selectReadingTime)
@@ -78,6 +92,7 @@ class AmoebaSetFundamentalParameters(QWidget):
         fundamentals.reading = self.readingTimeInt[temp]
         fundamentals.name = self.selectExperimentName.text()
         fundamentals.description = self.selectExperimentDescription.text()
+        fundamentals.script = self.selectScript.currentText()
         return fundamentals
 
 class ExperimentFundamentals():
@@ -89,6 +104,7 @@ class ExperimentFundamentals():
         self.reading = 0
         self.name = ""
         self.description = ""
+        self.script = ""
 
     def printFundamentals(self):
         """
@@ -98,6 +114,7 @@ class ExperimentFundamentals():
         print "Reading = " + str(self.reading)
         print "Name = " + str(self.name)
         print "Description = " + str(self.description)
+        print "Script = " + str(self.script)
 
     def createTree(self,root):
         """
@@ -111,4 +128,5 @@ class ExperimentFundamentals():
         root.attrib['name']=str(self.name)
         root.attrib['reading']=str(self.reading)
         root.attrib['sync']=str(self.sync)
+        root.attrib['script'] = str(self.script)
         return root

@@ -92,7 +92,7 @@ class AmoebaCreateExperiment(QWidget):
 
         #Create the widgets
         self.SetFundamentalParameters = AmoebaSetFundamentalParameters()
-        self.ShowAllInstruments = AmoebaShowAllInstuments()
+        self.ShowAllInstruments = AmoebaShowAllInstruments()
         self.LinkInstruments = LinkInstrumentsForm()
 
         self.next = QPushButton("Next")

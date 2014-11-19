@@ -339,6 +339,18 @@ class AmoebaInstrumentLink():
         print "Sensor Channel = " + str(self.sensorchannel)
         print "Boundaries = " + str(self.boundaries)
 
+    def __str__(self):
+        string = "Link:\n"
+        string = string + "Sensor address = " + str(self.sensoraddress) + "\n"
+        string = string + "Controller address = " + str(self.controlleraddress) + "\n"
+        string = string + "Controller = " + str(self.controller) + "\n"
+        string = string + "Value = " + str(self.value) + "\n"
+        string = string + "Channel = " + str(self.channel) + "\n"
+        string = string + "Sensor Channel = " + str(self.sensorchannel) + "\n"
+        string = string + "Boundaries = " + str(self.boundaries) + "\n"
+        string = string + "Inverse = " + str(self.inversly_proportional)
+        return string
+
     def writeXMLElement(self,link):
         """
         This method writes a link to an element for an elementTree.
@@ -355,7 +367,6 @@ class AmoebaInstrumentLink():
         link.attrib['sensor_channel']=str(self.sensorchannel)
         link.attrib['boundaries']=str(self.boundaries)
         link.attrib['inverse']=str(self.inversly_proportional)
-                
         return link
 
     def importFromTree(self,treeElement):
@@ -383,6 +394,13 @@ class AmoebaCommandController():
         print "Controller address = " + str(self.address)
         print "Controller channel = " + str(self.channel)
         print "Value = " + str(self.value)
+
+    def __str__(self):
+        string = "Command \n"
+        string = string + "Controller address = " + str(self.address) + "\n"
+        string = string + "Controller channel = " + str(self.channel) + "\n"
+        string = string + "Value = " + str(self.value) + "\n"
+        return string
 
     def writeXMLElement(self,element):
         element.attrib['controller_address'] = str(self.address)

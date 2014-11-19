@@ -7,6 +7,8 @@ import AmoebaSerialComms
 import AmoebaBusString
 from random import shuffle
 import PySide.QtCore as QTCore
+import random
+import datetime
 
 AMOEBA_EXPERIMENT_CONTROL=0
 AMOEBA_ANALYSE_STRING=0
@@ -33,10 +35,20 @@ class AmoebaExperimentControl(QTCore.QThread):
         self.server = server
         self.experiment = experiment
         self.tabs = tabs
-        self.connectedLocally = False
+
+        self.localMode = False
+        self.remoteMode = False
+        self.virtualMode = False
+
         self.updateTimer = QTimer()
         self.localUpdateTimer = QTimer()
         self.updateUITimer = QTimer()
+
+        #  Timers for virtual experiments
+        self.virtualExperimentTimer = QTimer()
+        self.virtualExperimentTimer.setInterval(100)
+        self.virtualExperimentTimer.timeout.connect(self.virtualUpdate)
+
         #  Set the time to run for a second.
         self.updateTimer.setInterval(1000)
         #  Link the timer to the update method.
@@ -49,10 +61,14 @@ class AmoebaExperimentControl(QTCore.QThread):
         self.updateUITimer.timeout.connect(self.updateUI)
         #  Make sure it's off.
         self.updateUITimer.stop()
+        self.updateUITimer.setInterval(1000)
         self.updateTimer.stop()
         self.stringMeth = AmoebaBusString.AmoebaBusStringMethods()
 
-    def run(self, *args, **kwargs):
+    def run(self,localMode,remoteMode,virtualMode):
+        self.localMode = localMode
+        self.remoteMode = remoteMode
+        self.virtualMode = virtualMode
         self.startExperiment()
 
     def updateExperiment(self,new_experiment):
@@ -70,29 +86,37 @@ class AmoebaExperimentControl(QTCore.QThread):
         """
         if AMOEBA_EXPERIMENT_CONTROL:
             print "Start Experiment"
-        if self.connectedLocally:
+        print "Start Experiment."
+        reply = "Not Starting"
+        if self.connectedLocally == True:
             self.startExperimentLocally()
             if AMOEBA_EXPERIMENT_CONTROL:
                 print "Start Locally"
             reply = "starting"
-        else:
+        if self.remoteMode == True:
             reply = self.startExperimentRemotely()
             if AMOEBA_EXPERIMENT_CONTROL:
                 print "Start Remotely"
+        if self.virtualMode == True:
+            self.virtualStart()
+            print "Start Virtual"
+            reply = "starting"
         if reply == "starting":
             return "SUCCESS"
         else:
             return "ERROR"
 
-    def stopExperiment(self,local_mode):
+    def stopExperiment(self):
         """
         This function tells the server to stop the experiment.
         :return: Nothing.
         """
-        if local_mode:
+        if self.localMode == True:
             self.stopExperimentLocally()
-        else:
+        if self.remoteMode == True:
             self.stopExperimentRemotely()
+        if self.virtualMode == True:
+            self.virtualStop()
 
     def updateUI(self):
         """
@@ -119,7 +143,8 @@ class AmoebaExperimentControl(QTCore.QThread):
         self.checkArray = []
         if self.experiment.script != "":
             x = __import__(self.experiment.script)
-            self.userScript = x.UserScript()
+            self.userScript = x.UserScript(self.experiment,self.localServer)
+            self.setServer(self.localServer)
         able_to_run = True
         if AMOEBA_EXPERIMENT_CONTROL:
             print "Run Experiment Locally."
@@ -159,7 +184,8 @@ class AmoebaExperimentControl(QTCore.QThread):
                 if AMOEBA_EXPERIMENT_CONTROL:
                     print "Experiment starting."
             #  Run the start script.
-            self.userScript.start()
+            if self.userScript != "":
+                self.userScript.start()
 
     def stopExperimentLocally(self):
         """
@@ -182,7 +208,7 @@ class AmoebaExperimentControl(QTCore.QThread):
         self.getLocalReadings()
         #  Start the scripted experiment turnly calculation.
         #  PUT IT HERE!!!
-        self.userScript.everyTurn()
+        #self.userScript.everyTurn()
 
     def getLocalReadings(self):
         #  For each instrument
@@ -248,14 +274,14 @@ class AmoebaExperimentControl(QTCore.QThread):
 #######################   Remote functions.  ########################################
 
     def startExperimentRemotely(self):
-            #  Clear the data from the past experiments.
-            self.experiment.clear_data()
-            #  Update the UI Accordingly
-            self.tabs.clear()
-            #  Send start experiment signal.
-            reply = self.server.send("experiment.start")
-            #  Start timer which sends the listen signal.
-            self.updateTimer.start()
+        #  Clear the data from the past experiments.
+        self.experiment.clear_data()
+        #  Update the UI Accordingly
+        self.tabs.clear()
+        #  Send start experiment signal.
+        reply = self.server.send("experiment.start")
+        #  Start timer which sends the listen signal.
+        self.updateTimer.start()
 
     def stopExperimentRemotely(self):
         if AMOEBA_EXPERIMENT_CONTROL:
@@ -323,3 +349,87 @@ class AmoebaExperimentControl(QTCore.QThread):
             self.tabs.update()
         except:
             print "Socket timed out."
+
+#######################   Virtual functions.  ########################################
+
+    def virtualStart(self):
+        print "Starting virtual experiment."
+        self.updateUITimer.start()
+        self.virtualExperimentTimer.start()
+        print "|" + self.experiment.script + "|"
+        if self.experiment.script != "":
+            x = __import__(self.experiment.script)
+            self.userScript = x.AmoebaRunTimeExperiment(self.experiment)
+            self.userScript.start()
+
+    def virtualUpdate(self):
+        print "Update virtual experiment."
+        for i in self.experiment.instruments:
+            for j in i.parameters:
+                if j.sensor == True:
+                    reading = Amoeba_reading()
+                    reading.set_reading_time(datetime.datetime.now())
+                    reading.set_sensor_reading(random.uniform(j.min,j.max))
+                    j.add_reading(reading)
+        self.virtualControl()
+        self.virtualStatic()
+        if self.experiment.script != "":
+            self.userScript.update()
+
+    def virtualStop(self):
+        print "Stopping virtual experiment."
+        self.updateUITimer.stop()
+        self.virtualExperimentTimer.stop()
+        if self.experiment.script != "":
+            self.userScript.end()
+
+    def virtualControl(self):
+        for i in self.experiment.links:
+            #  Retrieve sensor
+            print str(i)
+            for j in self.experiment.instruments:
+                if j.address == i.sensoraddress:
+                    sens = j
+                if j.address == i.controlleraddress:
+                    cont = j
+            #  Adjust controller output.
+            self.virtualAdjust(cont,sens,i)
+
+    def virtualAdjust(self,controller,sensor,link):
+        """
+        Virtual adjust.
+        """
+        newReading = Amoeba_reading()
+        newReading.set_reading_time(datetime.datetime.now())
+        #  Adjust controller output.
+        if link.inversly_proportional == 0:
+            #  If not inverted.
+            if sensor.parameters[link.sensorchannel].get_newest_full_reading().reading >= (link.value + link.boundaries):
+                newReading.set_sensor_reading(controller.parameters[link.channel].max)
+            else:
+                if sensor.parameters[link.sensorchannel].get_newest_full_reading().reading <= (link.value - link.boundaries):
+                    newReading.set_sensor_reading(controller.parameters[link.channel].min)
+                else:
+                    newReading.set_sensor_reading(controller.parameters[link.channel].get_newest_full_reading().reading)
+        else:
+            #   If inverse.
+            if sensor.parameters[link.sensorchannel].get_newest_full_reading().reading >= (link.value + link.boundaries):
+                newReading.set_sensor_reading(controller.parameters[link.channel].min)
+            else:
+                if sensor.parameters[link.sensorchannel].get_newest_full_reading().reading <= (link.value - link.boundaries):
+                    newReading.set_sensor_reading(controller.parameters[link.channel].max)
+                else:
+                    newReading.set_sensor_reading(controller.parameters[link.channel].get_newest_full_reading().reading)
+        #  Add new reading to parameter.
+        controller.parameters[link.channel].add_reading(newReading)
+
+    def virtualStatic(self):
+        for i in self.experiment.control:
+            for j in self.experiment.instruments:
+                if j.address == i.address:
+                    print "Add control reading."
+                    newReading = Amoeba_reading()
+                    newReading.set_sensor_reading(i.value)
+                    newReading.set_reading_time(datetime.datetime.now())
+                    j.parameters[i.channel].add_reading(newReading)
+

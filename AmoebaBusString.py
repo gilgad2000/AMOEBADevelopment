@@ -77,3 +77,14 @@ class AmoebaBusStringMethods():
             #  If there's an error return -1
             return -1, -1, -1
 
+    def RemoteCalibration(self,deviceAddress,parameterNumber,value):
+        remoteCalStr = "RemoteCalibration:" + str(deviceAddress) + ":" + str(parameterNumber) + ":" + str(value) + "\n"
+        if AMOEBA_BUS_DEBUG:
+            print remoteCalStr
+        return remoteCalStr
+
+    def RequestCalibration(self,deviceAddress,parameterNumber):
+        reqCalStr = "RequestCalibration:" + str(deviceAddress) + ":" + str(parameterNumber) + "\n"
+        if AMOEBA_BUS_DEBUG:
+            print reqCalStr
+        return reqCalStr

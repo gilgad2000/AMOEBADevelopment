@@ -11,7 +11,7 @@ from Amoeba import *
 AMOEBA_CREATE_EXPERIMENT_DEBUG = 0
 AMOEBA_CREATE_SELECT_UI_DEBUG=0
 
-class AmoebaShowAllInstuments(QWidget):
+class AmoebaShowAllInstruments(QWidget):
     def __init__(self,parent=None):
         """
         This function creates the widget which displays all available AMOEBA modules for an experiment.  It reads them

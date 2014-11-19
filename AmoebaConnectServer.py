@@ -21,6 +21,8 @@ class AmoebaConnectServer(QWidget):
 
         #  Running in Localmode by default
         self.running_local_mode = True
+        self.running_remote_mode = False
+        self.running_virtual_mode = False
 
         #Create the server
         self.server = server
@@ -63,10 +65,14 @@ class AmoebaConnectServer(QWidget):
         self.clearExperimentWidget = QPushButton("Clear Readings")
 
         #Local mode details
-        self.local_mode = QCheckBox("Local Mode")
+        self.remote_mode = QRadioButton("Remote Mode")
+        self.local_mode = QRadioButton("Local Mode")
+        self.virtual_mode = QRadioButton("Virtual Mode")
         self.serial_port_label = QLabel("Serial Port:")
         self.serial_port = QLineEdit("COM5")
         self.local_connect_button = QPushButton("Connect Locally")
+
+        self.set_mode = QGroupBox("Set Operation Mode.")
 
         self.local_mode.setChecked(1)
                                                                      
@@ -82,6 +88,15 @@ class AmoebaConnectServer(QWidget):
         self.layoutI = QVBoxLayout()
         self.layoutJ = QVBoxLayout()
         self.layoutK = QHBoxLayout()
+
+        modeSelectLayout = QVBoxLayout()
+
+        modeSelectLayout.addWidget(self.local_mode)
+        modeSelectLayout.addWidget(self.remote_mode)
+        modeSelectLayout.addWidget(self.virtual_mode)
+
+        self.set_mode.setLayout(modeSelectLayout)
+
 
         #Create Main Layout
 
@@ -121,11 +136,13 @@ class AmoebaConnectServer(QWidget):
         self.layoutK.addWidget(self.serial_port_label)
         self.layoutK.addWidget(self.serial_port)
 
-        self.layoutJ.addWidget(self.local_mode)
+
+        self.layoutJ.addWidget(self.set_mode)
 
         self.layoutJ.addLayout(self.layoutK)
 
         self.layoutJ.addWidget(self.local_connect_button)
+
 
         #Add sub layouts to main layout
         self.mainLayout.addLayout(self.layoutI)
@@ -153,9 +170,13 @@ class AmoebaConnectServer(QWidget):
         self.stopExperimentWidget.clicked.connect(self.stop)
         self.retrieveDataButton.clicked.connect(self.retrieve)
         self.testExperimentButton.clicked.connect(self.test)
-        self.local_mode.clicked.connect(self.localHost)
+        #.local_mode.clicked.connect(self.localHost)
         self.local_connect_button.clicked.connect(self.connect_locally)
         self.clearExperimentWidget.clicked.connect(self.clear_data)
+
+        self.virtual_mode.clicked.connect(self.virtualUISet)
+        self.local_mode.clicked.connect(self.localUISet)
+        self.remote_mode.clicked.connect(self.remoteUISet)
 
         #Disable necessary buttons.
         self.localModeActive()
@@ -184,7 +205,7 @@ class AmoebaConnectServer(QWidget):
         self.stopExperimentWidget.setEnabled(0)
         self.startExperimentWidget.setEnabled(1)
         self.clearExperimentWidget.setEnabled(1)
-        self.control.stopExperiment(self.running_local_mode)
+        self.control.stopExperiment()
 
     def start(self):
         """
@@ -195,7 +216,7 @@ class AmoebaConnectServer(QWidget):
         self.startExperimentWidget.setEnabled(0)
         print "Run experiment."
         self.control.connectedLocally = self.running_local_mode
-        self.control.run()
+        self.control.run(self.running_local_mode,self.running_remote_mode,self.running_virtual_mode)
 
     def show(self):
         """
@@ -281,20 +302,20 @@ class AmoebaConnectServer(QWidget):
         self.connect_button.setEnabled(0)
         self.disconnect_button.setEnabled(1)
         
-    def localHost(self):
-        """
-        This function sets AMEOABA into local host mode where the AMOEBA hardware is run off a uSB port on the local machine.
+    #def localHost(self):
+    #    """
+    #    This function sets AMEOABA into local host mode where the AMOEBA hardware is run off a uSB port on the local machine.
 
-        """
-        if self.local_mode.isChecked() == True:
-            self.localModeActive()
-            self.localMode = True
-        else:
-            self.localModeNotActive()
-            self.disconnectedDisabled()
-            self.localMode = False
+    #    """
+    #    if self.local_mode.isChecked() == True:
+    #        self.localModeActive()
+    #        self.localMode = True
+    #    else:
+    #        self.localModeNotActive()
+    #        self.disconnectedDisabled()
+    #        self.localMode = False
 
-    def localModeNotActive(self):
+    def remoteModeActive(self):
         """
         This function enables all the necessary buttons for remote operation.
         """
@@ -305,12 +326,17 @@ class AmoebaConnectServer(QWidget):
         self.serial_port.setEnabled(0)
         self.local_connect_button.setEnabled(0)
 
+        #Activate remote connect button.
+        self.connect_button.setEnabled(1)
+
+        #Start and stop buttons.
+        self.startExperimentWidget.setEnabled(0)
+        self.stopExperimentWidget.setEnabled(0)
 
     def localModeActive(self):
         """
         This function enables all the necessary
         """
-
         #Deactivate remote buttons.
         self.disconnectedDisabled()
         self.connect_button.setEnabled(0)
@@ -318,6 +344,25 @@ class AmoebaConnectServer(QWidget):
         #Activate local control
         self.serial_port.setEnabled(1)
         self.local_connect_button.setEnabled(1)
+
+        #Start and stop buttons.
+        self.startExperimentWidget.setEnabled(0)
+        self.stopExperimentWidget.setEnabled(0)
+
+    def virtualModeActive(self):
+        """
+        This function sets up the UI for virtual mode.
+        """
+        #Deactivate remote buttons.
+        self.connect_button.setEnabled(0)
+
+        #Activate local control
+        self.serial_port.setEnabled(0)
+        self.local_connect_button.setEnabled(0)
+
+        #Start and stop buttons.
+        self.startExperimentWidget.setEnabled(1)
+        self.stopExperimentWidget.setEnabled(0)
 
     def connect_locally(self):
         """
@@ -346,6 +391,42 @@ class AmoebaConnectServer(QWidget):
         :return:
         """
         self.control.clearData()
+
+    def modifyButtonStatus(self):
+        """
+        This method modifies the status of all the buttons on the UI depending on the state.
+        """
+        return 0
+
+    def virtualUISet(self):
+        """
+        This method sets the UI to virtual mode.
+        """
+        print "Set buttons to virtual mode."
+        self.virtualModeActive()
+        self.running_local_mode = False
+        self.running_remote_mode = False
+        self.running_virtual_mode = True
+
+    def localUISet(self):
+        """
+        This method sets the UI to virtual mode.
+        """
+        print "Set buttons to local mode."
+        self.localModeActive()
+        self.running_local_mode = True
+        self.running_remote_mode = False
+        self.running_virtual_mode = False
+
+    def remoteUISet(self):
+        """
+        This method sets the UI to virtual mode.
+        """
+        print "Set buttons to remote mode."
+        self.remoteModeActive()
+        self.running_local_mode = False
+        self.running_remote_mode = True
+        self.running_virtual_mode = False
 
 def main():
     app = QApplication(sys.argv)

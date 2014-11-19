@@ -201,6 +201,8 @@ class Amoeba_experiment():
                 self.time = datetime.datetime(int(date[0]),int(date[1]),int(date[2]),int(time[0]),int(time[1]),int(round(float(time[2]))))
             if AMOEBA_EXPERIMENT_DEBUG:
                 print self.time
+            #Get script details.
+            self.script = experiment.attrib.get("script")
         except:
             if AMOEBA_IMPORT_ERROR_MESSAGES==1:
                 print "Error importing basics."
